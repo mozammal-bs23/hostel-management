@@ -1,4 +1,25 @@
-# M1 Project Evaluation
+# Milestone 1 Evaluation: 17/20 (Revised)
+
+**Status:** ✅ Substantially Complete
+
+### 🏗 Stack-wise Evaluation Breakdown
+
+| Criteria | Score | Finding |
+| :--- | :---: | :--- |
+| **Server Setup** | 4/4 | `cmd/server/main.go` is functional, reads `PORT`, and handles requests. |
+| **API Implementation** | 4/4 | Health handler in `internal/handlers/health.go` returns correct JSON. |
+| **Project Structure** | 4/4 | Layout follows Go standards and PRD requirements. |
+| **Documentation** | 4/4 | `README.md` and `PRD.md` are comprehensive and up to date. |
+| **Best Practices** | 1/4 | **Gaps:** `.gitignore` is empty; `chi` router is not yet installed. |
+
+### 📝 Key Recommendations
+1.  **Dependency Management:** Run `go get github.com/go-chi/chi/v5` as per Milestone 1 step 1.8.
+2.  **VCS Hygiene:** Update `.gitignore` with standard patterns (`/bin/`, `.DS_Store`, etc.).
+3.  **Next Step:** Proceed to Milestone 2 (Room Model & In-Memory Store).
+
+---
+
+# Previous Evaluation (Archive)
 
 ## Score: 8/20
 
