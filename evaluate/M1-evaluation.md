@@ -17,7 +17,7 @@
 All initial setup tasks and best practices for Milestone 1 are now satisfied. The codebase is clean, modular, and ready for domain logic.
 
 ### 🚀 Next Step
-Proceed to **Milestone 2 (Room Model & In-Memory Store)** to start building the core hostel management entities.
+Proceed to **Milestone 2 (Room Model & In-Memory Store)**; later milestones add **Boarders** (`/api/v1/boarders`, `roomId` → Room) per `PRD.md` and `milestones/M4-boarder-model-store.md`.
 
 ---
 

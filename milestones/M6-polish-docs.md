@@ -15,13 +15,13 @@
   | Section | Content |
   |---------|---------|
   | **Project Title** | Hostel Management System — Go Backend |
-  | **Description** | One paragraph: what it does, who it's for |
+  | **Description** | One paragraph: rooms + boarders, REST API for Flutter |
   | **Tech Stack** | Go, chi, in-memory store (or SQLite) |
   | **Prerequisites** | Go 1.21+ |
   | **Getting Started** | Clone → `go mod download` → `go run ./cmd/server` |
   | **Environment Variables** | `PORT` (default 8080) |
   | **API Reference** | Table of all endpoints with method, path, description |
-  | **Request/Response Examples** | 2–3 curl examples with expected output |
+  | **Request/Response Examples** | curl examples for rooms and boarders |
   | **Project Structure** | Directory tree with one-line descriptions |
   | **Running Tests** | `go test ./... -v` |
   | **Future Work** | Auth, Flutter app, Postgres, etc. |
@@ -30,8 +30,8 @@
 
 - File: `scripts/seed.sh`
 - A bash script that creates sample data via curl:
-  - 3 rooms (single, double, dormitory)
-  - 3 residents (one per room, one unassigned)
+  - 3 rooms (varying capacity and `rentalPrice`)
+  - 3 boarders (valid `roomId` values referencing those rooms)
 - The script should:
   - Print what it's doing at each step
   - Use `jq` to extract IDs from responses (with a fallback note if jq isn't installed)
@@ -52,7 +52,7 @@
 - In `main.go`, listen for OS signals (`SIGINT`, `SIGTERM`) using `os/signal`.
 - On signal: call `server.Shutdown(ctx)` with a 10-second timeout.
 - Log "shutting down..." and "server stopped."
-- This prevents data loss and is good practice.
+- This prevents abrupt exits and is good practice.
 
 ### 6.5 Review and clean up code
 
@@ -71,10 +71,10 @@ If you finished early and want persistence across restarts:
 
 1. Run `go get github.com/mattn/go-sqlite3` (requires CGO) or `go get modernc.org/sqlite` (pure Go, no CGO).
 2. Create `internal/store/sqlite.go`.
-3. Implement `RoomStore` and `ResidentStore` interfaces using SQL.
+3. Implement `RoomStore` and `BoarderStore` interfaces using SQL.
 4. Create tables on startup (auto-migrate):
    - `rooms` table matching the Room struct
-   - `residents` table matching the Resident struct with a foreign key to `rooms`
+   - `boarders` table matching the Boarder struct with a foreign key `room_id` → `rooms(id)`
 5. Update `main.go` to choose store based on an env var: `STORE=memory` (default) or `STORE=sqlite`.
 6. Update README with SQLite instructions.
 
@@ -83,6 +83,7 @@ If you finished early and want persistence across restarts:
 ### 6.7 Update `.gitignore`
 
 Ensure it includes:
+
 ```
 # Binaries
 /bin/
@@ -137,7 +138,7 @@ Run through the complete workflow:
 | # | Check | How to verify |
 |---|-------|---------------|
 | 1 | README has all sections | Read the file |
-| 2 | Seed script creates rooms + residents | Run `bash scripts/seed.sh` |
+| 2 | Seed script creates rooms + boarders | Run `bash scripts/seed.sh` |
 | 3 | CORS headers present | `curl -I -X OPTIONS http://localhost:8080/api/v1/rooms` |
 | 4 | Graceful shutdown works | Start server → Ctrl+C → see "server stopped" |
 | 5 | `go vet` and `go fmt` pass | Run both with zero output |
@@ -158,14 +159,14 @@ hostel-management/
 │   │   ├── health.go            # GET /health
 │   │   ├── response.go          # JSON response helpers
 │   │   ├── room.go              # Room CRUD handlers
-│   │   └── resident.go          # Resident CRUD handlers
+│   │   └── boarder.go           # Boarder CRUD handlers
 │   ├── models/
 │   │   ├── room.go              # Room struct, validation, constants
-│   │   └── resident.go          # Resident struct, validation, constants
+│   │   └── boarder.go           # Boarder struct, validation, constants
 │   ├── store/
-│   │   ├── store.go             # Interfaces: RoomStore, ResidentStore
+│   │   ├── store.go             # Interfaces: RoomStore, BoarderStore
 │   │   ├── memory.go            # In-memory implementation
-│   │   └── memory_test.go       # Unit tests (or split into two test files)
+│   │   └── memory_test.go       # Unit tests (or split into multiple test files)
 │   └── router/
 │       └── router.go            # chi router, middleware, route groups
 ├── scripts/
@@ -174,8 +175,8 @@ hostel-management/
 │   ├── M1-project-setup.md
 │   ├── M2-room-model-store.md
 │   ├── M3-room-handlers.md
-│   ├── M4-resident-model-store.md
-│   ├── M5-resident-handlers.md
+│   ├── M4-boarder-model-store.md
+│   ├── M5-boarder-handlers.md
 │   └── M6-polish-docs.md
 ├── .gitignore
 ├── go.mod
@@ -191,7 +192,7 @@ hostel-management/
 By completing all 6 milestones, you have:
 
 - A clean, idiomatic Go REST API
-- Full CRUD for Rooms and Residents
+- Full CRUD for Rooms and Boarders (`roomId` → Room)
 - Consistent JSON responses with proper HTTP status codes
 - Filtered list endpoints ready for Flutter integration
 - CORS support for Flutter web
@@ -200,9 +201,10 @@ By completing all 6 milestones, you have:
 - Documentation a Flutter developer can follow
 
 **Total endpoints: 11**
+
 - `GET /health`
 - `POST/GET/GET/:id/PUT/:id/DELETE/:id` for `/api/v1/rooms`
-- `POST/GET/GET/:id/PUT/:id/DELETE/:id` for `/api/v1/residents`
+- `POST/GET/GET/:id/PUT/:id/DELETE/:id` for `/api/v1/boarders`
 
 ---
 
@@ -213,12 +215,12 @@ By completing all 6 milestones, you have:
 | 1 | Flutter app consuming this API | 4–6h |
 | 2 | SQLite or Postgres persistence | 2–3h |
 | 3 | JWT authentication | 2–3h |
-| 4 | Check-in/check-out workflow | 1–2h |
+| 4 | Check-in/check-out dates on boarders | 1–2h |
 | 5 | Room occupancy tracking | 1–2h |
 | 6 | Pagination metadata in list responses | 30min |
 | 7 | Docker + docker-compose | 1h |
 
 ---
 
-*Previous → [M5: Resident HTTP Handlers](./M5-resident-handlers.md)*  
+*Previous → [M5: Boarder HTTP Handlers](./M5-boarder-handlers.md)*  
 *Back to → [PRD](../PRD.md)*
