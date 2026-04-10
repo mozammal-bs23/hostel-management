@@ -1,0 +1,25 @@
+---
+description: GitHub PR checklist — metadata, project, and issue linking for this repo
+alwaysApply: true
+---
+
+# Pull requests (hostel-management)
+
+When opening or updating a pull request for this repository, complete the metadata so the board and history stay consistent.
+
+## Required metadata
+
+1. **Assignees**: Assign the PR owner (or the active implementer), typically `@mozammal-bs23`.
+2. **Labels**: Use at least **enhancement** for feature work; add **documentation** when the PR changes docs or evaluation notes under `evaluate/` or similar.
+3. **Project**: Add the PR to the **Hostel Management** GitHub Project (Projects v2). Prefer `gh project item-add` when `gh pr edit --add-project` fails due to classic Projects deprecation.
+4. **Milestone**: Set a repo milestone that matches the ticket (e.g. **HM-15 — …** for HM-15 work). Create the milestone on GitHub if it does not exist yet.
+5. **Development (issue link)**: In the PR description, include a line such as `Closes #N` (or `Fixes #N`) so GitHub links the PR to the tracking issue and shows it under **Development**.
+
+## CLI notes
+
+- If `gh pr edit` errors with GraphQL / Projects (classic) deprecation, use the REST API: `PATCH /repos/{owner}/{repo}/issues/{number}` for assignees, labels, milestone, and body.
+- Project board: `gh project list --owner mozammal-bs23` then `gh project item-add <n> --owner mozammal-bs23 --url <PR_URL>`.
+
+## PR body structure
+
+Prefer: **Summary** → **Changes** → **Testing** → **Development** (issue closing line) → **Related** (branch, milestone, project).
