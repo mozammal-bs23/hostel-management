@@ -1,8 +1,8 @@
 # Hostel Management System (Go Backend)
 
-A lightweight REST API backend built with Go for managing hostel rooms and residents. This project is designed as a modular, 8-hour development slice, serving as a backend for future Flutter or web applications.
+A lightweight REST API backend built with Go for managing hostel **rooms** and **boarders** (guests assigned to rooms). The project follows a modular, 8-hour development slice and is intended as a backend for a future Flutter or web client.
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - [Go](https://go.dev/doc/install) (v1.21 or later)
@@ -19,67 +19,77 @@ A lightweight REST API backend built with Go for managing hostel rooms and resid
    ```
 
 ### Running the Server
-The server runs on port `8080` by default. You can override this by setting the `PORT` environment variable.
+The server runs on port `8080` by default. Override with the `PORT` environment variable.
 
 ```bash
-# Run using Go
 go run ./cmd/server/main.go
+```
 
-# Or build and run the binary
+```bash
 go build -o server ./cmd/server/main.go
 ./server
 ```
 
+### Health Check
+```bash
+curl http://localhost:8080/health
+```
+Expected: `{"status":"ok"}` (or equivalent JSON from `internal/handlers/health.go`).
+
 ---
 
-## 🛠 API Endpoints
+## API Endpoints
 
-### Health Check
-- **GET** `/health`
-  - Returns the current status of the API.
-  - Response: `{"status": "ok"}`
-
-### Planned Endpoints (Milestones 2-5)
+### Implemented
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `GET` | `/api/v1/rooms` | List all rooms (supports filters) |
+| `GET` | `/health` | Liveness / health check |
+
+### Planned (see `PRD.md` and `milestones/`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/v1/rooms` | List rooms (filters TBD, e.g. `status`) |
 | `GET` | `/api/v1/rooms/:id` | Get room by ID |
-| `POST` | `/api/v1/rooms` | Create a new room |
-| `PUT` | `/api/v1/rooms/:id` | Update room details |
+| `POST` | `/api/v1/rooms` | Create a room |
+| `PUT` | `/api/v1/rooms/:id` | Update a room |
 | `DELETE` | `/api/v1/rooms/:id` | Delete a room |
-| `GET` | `/api/v1/residents` | List all residents |
-| `POST` | `/api/v1/residents` | Register a new resident |
+| `GET` | `/api/v1/boarders` | List boarders (`roomId`, `status`, pagination) |
+| `GET` | `/api/v1/boarders/:id` | Get boarder by ID |
+| `POST` | `/api/v1/boarders` | Create a boarder |
+| `PUT` | `/api/v1/boarders/:id` | Update a boarder |
+| `DELETE` | `/api/v1/boarders/:id` | Delete a boarder |
+
+Domain model details: **`PRD.md`** (`Room` includes `rentalPrice`; `Boarder` uses `firstName`, `lastName`, `phone`, required `roomId` referencing `Room.id`).
 
 ---
 
-## 🏗 Project Structure
+## Project Structure
 
 ```text
 hostel-management/
 ├── cmd/
-│   └── server/          # Application entry point
+│   └── server/              # Application entry point
 ├── internal/
-│   ├── handlers/        # HTTP request handlers
-│   ├── models/          # Domain entities (Room, Resident)
-│   ├── store/           # Data persistence logic (Interfaces & Impls)
-│   └── router/          # API route configuration
-├── milestones/          # Detailed development tracking
-├── PRD.md               # Product Requirements Document
-└── go.mod               # Go module definition
+│   ├── handlers/            # HTTP handlers (health; room/boarder in later milestones)
+│   ├── models/              # Domain entities (room.go, boarder.go)
+│   ├── store/               # Persistence (interfaces + implementations)
+│   └── router/              # Routes and middleware
+├── milestones/              # Milestone plans (M1–M6)
+├── PRD.md                   # Product requirements
+└── go.mod
 ```
 
 ---
 
-## 📅 Milestones
-The project is divided into 6 clear milestones:
-1. **M1: Project Setup & Health Check** (Current)
-2. **M2: Room Model & Store**
-3. **M3: Room API Handlers**
-4. **M4: Resident Model & Store**
-5. **M5: Resident API Handlers**
-6. **M6: Polish & Documentation**
+## Milestones
+1. **M1:** Project setup and health check  
+2. **M2:** Room model and in-memory store  
+3. **M3:** Room HTTP API  
+4. **M4:** Boarder model and store (`roomId` → Room)  
+5. **M5:** Boarder HTTP API  
+6. **M6:** Polish, docs, optional SQLite, seed examples  
 
-See the `milestones/` directory for detailed progress on each stage.
+See the `milestones/` directory for step-by-step checklists.
 
-## 📄 License
-This project is for educational/prototype purposes.
+## License
+This project is for educational or prototype use.

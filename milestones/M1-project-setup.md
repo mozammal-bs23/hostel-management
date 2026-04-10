@@ -121,4 +121,5 @@ Include:
 
 ---
 
-*Next → [M2: Room Model & In-Memory Store](./M2-room-model-store.md)*
+*Next → [M2: Room Model & In-Memory Store](./M2-room-model-store.md)*  
+*Domain terms: **Boarder** = guest entity (`internal/models/boarder.go`); **Room** = `internal/models/room.go`.*

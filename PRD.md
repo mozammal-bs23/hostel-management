@@ -1,7 +1,7 @@
 # Product Requirements Document (PRD)
 # Hostel Management System — Go Backend
 
-**Version:** 1.0  
+**Version:** 1.1  
 **Target:** 8 hours (single developer)  
 **Backend:** Go (Golang)  
 **Future consumer:** Flutter app (REST API)
@@ -11,10 +11,10 @@
 ## 1. Overview
 
 ### 1.1 Purpose
-A REST API backend in Go for a **hostel management system** that supports core CRUD operations for **Rooms** and **Residents**. The API will be consumable by a Flutter frontend later.
+A REST API backend in Go for a **hostel management system** that supports core CRUD operations for **Rooms** and **Boarders** (people staying in rooms). The API will be consumable by a Flutter frontend later.
 
 ### 1.2 Goals
-- Implement full CRUD for **Rooms** and **Residents**
+- Implement full CRUD for **Rooms** and **Boarders**
 - Use in-memory or SQLite storage (no external DB setup)
 - Clean project structure, ready for Flutter integration
 - Achievable in **8 hours** with clear milestones
@@ -31,29 +31,35 @@ A REST API backend in Go for a **hostel management system** that supports core C
 ## 2. Domain Model
 
 ### 2.1 Room
-| Field       | Type   | Required | Description                    |
-|------------|--------|----------|--------------------------------|
-| `id`       | string | auto     | UUID                          |
-| `name`     | string | yes      | e.g. "Room 101"               |
-| `capacity` | int    | yes      | Max occupants (e.g. 2, 4)     |
-| `floor`    | int    | no       | Floor number                  |
-| `status`   | string | yes      | `available`, `occupied`, `maintenance` |
-| `createdAt`| string | auto     | ISO 8601                      |
-| `updatedAt`| string | auto     | ISO 8601                      |
+| Field          | Type    | Required | Description                              |
+|----------------|---------|----------|------------------------------------------|
+| `id`           | string  | auto     | UUID                                     |
+| `name`         | string  | yes      | e.g. "Room 101"                          |
+| `capacity`     | int     | yes      | Max occupants (e.g. 2, 4)                |
+| `status`       | string  | yes      | `available`, `occupied`, `maintenance`   |
+| `rentalPrice`  | number  | yes      | Non-negative rental amount               |
+| `createdAt`    | string  | auto     | ISO 8601                                 |
+| `updatedAt`    | string  | auto     | ISO 8601                                 |
 
-### 2.2 Resident
-| Field       | Type   | Required | Description                    |
-|------------|--------|----------|--------------------------------|
-| `id`       | string | auto     | UUID                          |
-| `name`     | string | yes      | Full name                     |
-| `email`    | string | yes      | Unique                        |
-| `phone`    | string | no       | Contact number                |
-| `roomId`   | string | no       | FK to Room (nullable)         |
-| `checkIn`  | string | no       | ISO 8601 date                 |
-| `checkOut` | string | no       | ISO 8601 date                 |
-| `status`   | string | yes      | `active`, `checked_out`, `pending` |
-| `createdAt`| string | auto     | ISO 8601                      |
-| `updatedAt`| string | auto     | ISO 8601                      |
+*Implementation:* `internal/models/room.go`
+
+### 2.2 Boarder
+A **boarder** is a guest assigned to a room. `roomId` is the logical foreign key to `Room.id`.
+
+| Field        | Type   | Required | Description                                      |
+|-------------|--------|----------|--------------------------------------------------|
+| `id`        | string | auto     | UUID                                             |
+| `firstName` | string | yes*     | Given name (at least one of first/last required) |
+| `lastName`  | string | yes*     | Family name                                      |
+| `phone`     | string | yes      | Contact number                                   |
+| `roomId`    | string | yes      | FK to Room (`Room.id`)                           |
+| `status`    | string | yes      | `active`, `checked_out`, `pending`               |
+| `createdAt` | string | auto     | ISO 8601                                         |
+| `updatedAt` | string | auto     | ISO 8601                                         |
+
+\*Validation: `firstName` and `lastName` cannot both be empty.
+
+*Implementation:* `internal/models/boarder.go`
 
 ---
 
@@ -72,19 +78,19 @@ A REST API backend in Go for a **hostel management system** that supports core C
 | PUT    | `/rooms/:id`      | Update room        |
 | DELETE | `/rooms/:id`      | Delete room        |
 
-**Query (GET /rooms):** optional `status`, `floor`, `limit`, `offset`.
+**Query (GET /rooms):** optional `status`, `limit`, `offset` (extend with more filters as needed).
 
-### 3.3 Residents
+### 3.3 Boarders
 
-| Method | Path                | Description          |
-|--------|---------------------|----------------------|
-| GET    | `/residents`        | List all residents   |
-| GET    | `/residents/:id`    | Get resident by ID   |
-| POST   | `/residents`        | Create resident      |
-| PUT    | `/residents/:id`    | Update resident      |
-| DELETE | `/residents/:id`    | Delete resident      |
+| Method | Path                | Description           |
+|--------|---------------------|-----------------------|
+| GET    | `/boarders`         | List all boarders     |
+| GET    | `/boarders/:id`     | Get boarder by ID     |
+| POST   | `/boarders`         | Create boarder        |
+| PUT    | `/boarders/:id`     | Update boarder        |
+| DELETE | `/boarders/:id`     | Delete boarder        |
 
-**Query (GET /residents):** optional `roomId`, `status`, `limit`, `offset`.
+**Query (GET /boarders):** optional `roomId`, `status`, `limit`, `offset`.
 
 ### 3.4 Response Format
 - Success: `{ "data": <entity|array>, "message": "..." }` with HTTP 200/201
@@ -109,7 +115,7 @@ A REST API backend in Go for a **hostel management system** that supports core C
 
 ### Milestone 2 — Room model & in-memory store (≈1.5 hours)
 **Deliverables:**
-- `internal/models/room.go` — Room struct and validation
+- `internal/models/room.go` — Room struct (including `rentalPrice`) and validation
 - `internal/store/store.go` — interface (e.g. `RoomStore`) with CRUD
 - `internal/store/memory.go` — in-memory implementation with map keyed by ID
 - Unit tests for store (create, get, list, update, delete)
@@ -122,32 +128,33 @@ A REST API backend in Go for a **hostel management system** that supports core C
 **Deliverables:**
 - `internal/handlers/room.go` — Create, GetByID, List, Update, Delete
 - `internal/router/router.go` — mount `/api/v1/rooms` and wire handlers
-- Request/response JSON binding (e.g. `encoding/json` or chi/gin)
+- Request/response JSON binding
 - 404 on missing room; 400 on invalid body
 
 **Acceptance:** Full Room CRUD via curl/Postman; correct status codes and JSON.
 
 ---
 
-### Milestone 4 — Resident model & store (≈1.5 hours)
+### Milestone 4 — Boarder model & store (≈1.5 hours)
 **Deliverables:**
-- `internal/models/resident.go` — Resident struct and validation
-- Extend store interface and in-memory store for residents
-- Optional: ensure “list residents by roomId” is efficient
-- Unit tests for resident store
+- `internal/models/boarder.go` — Boarder struct and validation (`roomId` required; aligns with Room FK)
+- Extend store interface and in-memory store for boarders
+- Optional: ensure “list boarders by `roomId`” is efficient
+- Unit tests for boarder store
 
-**Acceptance:** Resident CRUD in store works; list by `roomId` works.
+**Acceptance:** Boarder CRUD in store works; list by `roomId` works.
 
 ---
 
-### Milestone 5 — Resident HTTP handlers & routes (≈1.5 hours)
+### Milestone 5 — Boarder HTTP handlers & routes (≈1.5 hours)
 **Deliverables:**
-- `internal/handlers/resident.go` — Create, GetByID, List, Update, Delete
-- Mount `/api/v1/residents` in router
+- `internal/handlers/boarder.go` — Create, GetByID, List, Update, Delete
+- Mount `/api/v1/boarders` in router
 - Query params: `roomId`, `status`, `limit`, `offset`
 - Consistent error responses with Room API
+- Optional: when `roomId` is set, verify room exists via `RoomStore` (400 if invalid)
 
-**Acceptance:** Full Resident CRUD and filtered list via API.
+**Acceptance:** Full Boarder CRUD and filtered list via API.
 
 ---
 
@@ -156,7 +163,7 @@ A REST API backend in Go for a **hostel management system** that supports core C
 - Optional: swap to SQLite (e.g. `internal/store/sqlite.go`) or keep in-memory and document it
 - README: how to run, env vars (e.g. `PORT`), list of endpoints with examples
 - `.gitignore` for Go (binaries, vendor, IDE)
-- Seed script or curl examples for 2–3 rooms and 2–3 residents
+- Seed script or curl examples for 2–3 rooms and 2–3 boarders
 
 **Acceptance:** New developer can clone, run server, and call all endpoints from README.
 
@@ -168,7 +175,7 @@ A REST API backend in Go for a **hostel management system** that supports core C
 |----------|---------------------|--------------------------------|
 | Language | Go 1.21+            |                                |
 | HTTP     | `net/http` or chi   | Chi recommended for routing    |
-| Storage  | In-memory (default) | Optional SQLite in M6         |
+| Storage  | In-memory (default) | Optional SQLite in M6          |
 | ID       | `github.com/google/uuid` | For `id` fields          |
 | Config   | Env (e.g. `PORT`)   | Default port 8080              |
 
@@ -184,10 +191,10 @@ hostel-management/
 ├── internal/
 │   ├── handlers/
 │   │   ├── room.go
-│   │   └── resident.go
+│   │   └── boarder.go
 │   ├── models/
 │   │   ├── room.go
-│   │   └── resident.go
+│   │   └── boarder.go
 │   ├── store/
 │   │   ├── store.go      # interfaces
 │   │   ├── memory.go     # in-memory impl
@@ -210,8 +217,8 @@ hostel-management/
 | M1 — Setup & health | 1h  | 1h  |
 | M2 — Room model & store | 1.5h | 2.5h |
 | M3 — Room API | 1.5h | 4h  |
-| M4 — Resident model & store | 1.5h | 5.5h |
-| M5 — Resident API | 1.5h | 7h  |
+| M4 — Boarder model & store | 1.5h | 5.5h |
+| M5 — Boarder API | 1.5h | 7h  |
 | M6 — Polish & docs | 1h  | 8h  |
 
 ---
@@ -220,7 +227,7 @@ hostel-management/
 
 - [ ] Server runs with `go run ./cmd/server` (or binary).
 - [ ] All Room CRUD endpoints work and return correct JSON and status codes.
-- [ ] All Resident CRUD endpoints work with optional query filters.
+- [ ] All Boarder CRUD endpoints work with optional query filters.
 - [ ] README allows a Flutter developer to integrate against the API without reading code.
 - [ ] Code is structured so adding SQLite or Postgres later is straightforward.
 
@@ -231,9 +238,10 @@ hostel-management/
 - JWT auth and role-based access
 - Flutter app consuming this API
 - SQLite/Postgres persistence
-- Check-in/check-out workflow and room status updates
+- Check-in/check-out dates on boarders and room status automation
 - Pagination metadata in list responses (`total`, `limit`, `offset`)
+- Floor or building metadata on rooms if product needs it
 
 ---
 
-*PRD prepared for an 8-hour Go backend slice. Adjust milestones if you spend more or less time on testing or SQLite.*
+*PRD aligned with `Room` and `Boarder` models in `internal/models`. Adjust milestones if you spend more or less time on testing or SQLite.*

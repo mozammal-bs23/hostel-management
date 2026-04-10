@@ -42,7 +42,7 @@
 |---------|-------|-------------|-------|
 | `Create` | `POST /` | 201, 400 | Decode JSON body → validate → call `store.Create` → respond 201 with room |
 | `GetByID` | `GET /{id}` | 200, 404 | Extract `id` from URL param → call `store.GetByID` → 404 if `ErrNotFound` |
-| `List` | `GET /` | 200 | Parse query params (`status`, `floor`, `limit`, `offset`) → build `RoomFilters` → call `store.List` |
+| `List` | `GET /` | 200 | Parse query params (`status`, `limit`, `offset`) → build `RoomFilters` → call `store.List` |
 | `Update` | `PUT /{id}` | 200, 400, 404 | Extract `id` → decode body → validate → call `store.Update` → 404 if not found |
 | `Delete` | `DELETE /{id}` | 204, 404 | Extract `id` → call `store.Delete` → 204 (no body) on success |
 
@@ -77,7 +77,7 @@ Run through every endpoint and verify:
 # Create
 curl -X POST http://localhost:8080/api/v1/rooms \
   -H "Content-Type: application/json" \
-  -d '{"name":"Room 101","capacity":2,"floor":1,"status":"available"}'
+  -d '{"name":"Room 101","capacity":2,"rentalPrice":100,"status":"available"}'
 
 # List
 curl http://localhost:8080/api/v1/rooms
@@ -88,7 +88,7 @@ curl http://localhost:8080/api/v1/rooms/<id>
 # Update
 curl -X PUT http://localhost:8080/api/v1/rooms/<id> \
   -H "Content-Type: application/json" \
-  -d '{"name":"Room 101 Deluxe","capacity":3,"floor":1,"status":"available"}'
+  -d '{"name":"Room 101 Deluxe","capacity":3,"rentalPrice":120,"status":"available"}'
 
 # Delete
 curl -X DELETE http://localhost:8080/api/v1/rooms/<id>
@@ -143,4 +143,4 @@ curl http://localhost:8080/api/v1/rooms/<id>
 ---
 
 *Previous → [M2: Room Model & Store](./M2-room-model-store.md)*  
-*Next → [M4: Resident Model & Store](./M4-resident-model-store.md)*
+*Next → [M4: Boarder Model & Store](./M4-boarder-model-store.md)*

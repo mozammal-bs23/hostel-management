@@ -14,7 +14,7 @@
   - `ID` (string) — UUID, auto-generated
   - `Name` (string) — required, e.g. "Room 101"
   - `Capacity` (int) — required, must be > 0
-  - `Floor` (int) — optional (zero value is fine)
+  - `RentalPrice` (float64) — required, must be >= 0
   - `Status` (string) — required, one of: `available`, `occupied`, `maintenance`
   - `CreatedAt` (time.Time) — auto-set on creation
   - `UpdatedAt` (time.Time) — auto-set on creation and update
@@ -25,6 +25,7 @@
 - Rules:
   - `Name` must not be empty.
   - `Capacity` must be >= 1.
+  - `RentalPrice` must be >= 0.
   - `Status` must be one of the three allowed values.
 - Return a descriptive error message (e.g. `"name is required"`).
 - **Tip:** Define the allowed statuses as constants in the same file for reuse.
@@ -53,7 +54,7 @@
   | Update | `Update(id string, room models.Room) (models.Room, error)` | Update existing room |
   | Delete | `Delete(id string) error` | Remove room |
 
-- Define a `RoomFilters` struct with optional fields: `Status *string`, `Floor *int`, `Limit int`, `Offset int`.
+- Define a `RoomFilters` struct with optional fields: `Status *string`, `Limit int`, `Offset int` (add more filters later if needed, e.g. price range).
 
 ### 2.6 Define a sentinel error
 
@@ -118,7 +119,7 @@
 |----------|--------|-----------|
 | Storage | `map[string]Room` + mutex | Simplest for an 8-hour scope; swap later |
 | ID generation | UUID v4 | Globally unique, no DB sequence needed |
-| Filtering | Pointer fields in `RoomFilters` | `nil` means "don't filter", zero-value `int` would filter for floor 0 |
+| Filtering | Pointer fields in `RoomFilters` | `nil` means "don't filter" for optional string filters |
 | Interface | `RoomStore` | Easy to swap in-memory → SQLite later |
 
 ---
@@ -132,4 +133,5 @@
 ---
 
 *Previous → [M1: Project Setup](./M1-project-setup.md)*  
-*Next → [M3: Room HTTP Handlers](./M3-room-handlers.md)*
+*Next → [M3: Room HTTP Handlers](./M3-room-handlers.md)*  
+*Boarders (guests) are introduced in [M4](./M4-boarder-model-store.md); `boarder.roomId` references `room.id`.*
