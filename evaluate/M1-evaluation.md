@@ -1,5 +1,28 @@
-# Milestone 1 Evaluation: 17/20 (Revised)
+# Milestone 1 Evaluation — Eval #3
 
+**Score: 18/20**  
+**Status:** ✅ Substantially Complete (Router Wired)
+
+### 🏗 Stack-wise Evaluation Breakdown
+
+| Criteria | Score | Finding |
+| :--- | :---: | :--- |
+| **Server Setup** | 4/4 | `cmd/server/main.go` is functional and correctly uses `github.com/go-chi/chi/v5`. |
+| **API Implementation** | 4/4 | Health handler in `internal/handlers/health.go` returns correct JSON. |
+| **Project Structure** | 4/4 | Layout follows Go standards; files are in their respective packages. |
+| **Documentation** | 4/4 | `README.md` is updated with setup and running instructions. |
+| **Best Practices** | 2/4 | **Gaps:** `.gitignore` remains empty; `internal/router/router.go` is defined but not yet imported/used in `main.go`. |
+
+### 📝 Key Recommendations
+1.  **VCS Hygiene:** Update `.gitignore` with `/bin/`, `.DS_Store`, and `.env` patterns.
+2.  **Architectural Alignment:** Import `example.com/hostel-management/internal/router` in `main.go` and use `router.New()` to centralize route definitions.
+3.  **Next Step:** Proceed to Milestone 2 to define the `Room` model and implement the in-memory store.
+
+---
+
+# Previous Evaluation — Eval #2 (Revised)
+
+**Score: 17/20**  
 **Status:** ✅ Substantially Complete
 
 ### 🏗 Stack-wise Evaluation Breakdown
@@ -12,16 +35,11 @@
 | **Documentation** | 4/4 | `README.md` and `PRD.md` are comprehensive and up to date. |
 | **Best Practices** | 1/4 | **Gaps:** `.gitignore` is empty; `chi` router is not yet installed. |
 
-### 📝 Key Recommendations
-1.  **Dependency Management:** Run `go get github.com/go-chi/chi/v5` as per Milestone 1 step 1.8.
-2.  **VCS Hygiene:** Update `.gitignore` with standard patterns (`/bin/`, `.DS_Store`, etc.).
-3.  **Next Step:** Proceed to Milestone 2 (Room Model & In-Memory Store).
-
 ---
 
-# Previous Evaluation (Archive)
+# Previous Evaluation — Eval #1 (Archive)
 
-## Score: 8/20
+**Score: 8/20**
 
 ### Breakdown by Acceptance Criteria:
 
@@ -44,9 +62,3 @@
 5. **.gitignore present** (2/4):  
    - `.gitignore` file exists.  
    - However, it is empty and does not include the recommended patterns (e.g., `/bin/`, `.env`, `.DS_Store`).
-
-### Additional Notes:
-- Go module is initialized correctly in `go.mod`.  
-- `README.md` is present but empty (not required by acceptance criteria but mentioned in steps).  
-- Chi router dependency not installed (mentioned as preparation for M3).  
-- Overall, the project structure is set up, but no functional code has been implemented.
