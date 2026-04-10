@@ -5,9 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"example.com/hostel-management/internal/handlers"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"example.com/hostel-management/internal/router"
 )
 
 func main() {
@@ -16,10 +14,7 @@ func main() {
 		port = "8080"
 	}
 
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-
-	r.Get("/health", handlers.Health)
+	r := router.New()
 
 	log.Printf("listening on :%s", port)
 	log.Fatal(http.ListenAndServe(":"+port, r))
