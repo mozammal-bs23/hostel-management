@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"example.com/hostel-management/internal/handlers"
+	"example.com/hostel-management/internal/router"
 )
 
 func main() {
@@ -14,9 +14,8 @@ func main() {
 		port = "8080"
 	}
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/health", handlers.Health)
+	r := router.New()
 
 	log.Printf("listening on :%s", port)
-	log.Fatal(http.ListenAndServe(":"+port, mux))
+	log.Fatal(http.ListenAndServe(":"+port, r))
 }
